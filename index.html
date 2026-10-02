@@ -1,791 +1,602 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>星光予你 · 生日快乐</title>
-<meta name="description" content="为你点亮整片星空的生日祝福" />
-<meta name="theme-color" content="#07071a" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原神祈愿模拟器 · 7.1版本</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-:root{
-  --bg-1:#05051a;
-  --bg-2:#101033;
-  --bg-3:#251848;
-  --text:#ece9ff;
-  --text-dim:#a49fd0;
-  --purple:#8b7bff;
-  --cyan:#5fd0ff;
-  --pink:#ff8fd0;
-  --gold:#ffd98b;
-  --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
+  :root {
+    --gold: #d3bc8e;
+    --gold-l: #ffe6b0;
+    --r5: #ffb13f;
+    --r4: #b57ef5;
+    --r3: #6ba7e0;
+  }
 
-html,body{height:100%;overflow:hidden;}
+  body {
+    min-height: 100vh;
+    font-family: "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #080b12;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, #2a3f5f 0%, transparent 70%),
+      radial-gradient(ellipse 60% 45% at 50% 110%, #1a2740 0%, transparent 70%);
+    background-attachment: fixed;
+    color: #e8e0d0;
+    display: flex;
+    justify-content: center;
+    padding: 28px 16px 56px;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-body{
-  font-family:var(--font);
-  color:var(--text);
-  background:var(--bg-1);
-  -webkit-tap-highlight-color:transparent;
-  -webkit-font-smoothing:antialiased;
-}
+  .wrap { width: 100%; max-width: 800px; }
 
-/* ================= 深空背景 ================= */
-.space{
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:
-    radial-gradient(ellipse 120% 80% at 50% 0%, #1b1442 0%, transparent 60%),
-    radial-gradient(ellipse 100% 70% at 50% 100%, #241a4d 0%, transparent 62%),
-    linear-gradient(180deg, #05051a 0%, #0b0b26 45%, #120e2e 100%);
-}
+  header { text-align: center; margin-bottom: 20px; }
 
-.nebula{
-  position:absolute; border-radius:50%;
-  filter:blur(70px);
-  will-change:transform;
-}
-.nebula.a{
-  width:76vw; height:76vw; left:-24vw; top:-26vw;
-  background:radial-gradient(circle, rgba(139,123,255,.34), transparent 66%);
-  animation:drift 34s ease-in-out infinite;
-}
-.nebula.b{
-  width:64vw; height:64vw; right:-22vw; top:8vh;
-  background:radial-gradient(circle, rgba(95,208,255,.22), transparent 66%);
-  animation:drift 42s ease-in-out infinite reverse;
-}
-.nebula.c{
-  width:58vw; height:58vw; left:24vw; bottom:-24vw;
-  background:radial-gradient(circle, rgba(255,143,208,.20), transparent 66%);
-  animation:drift 38s ease-in-out infinite;
-}
-@keyframes drift{
-  0%,100%{ transform:translate(0,0) scale(1); }
-  33%    { transform:translate(5vw,-3vh) scale(1.08); }
-  66%    { transform:translate(-4vw,4vh) scale(.95); }
-}
+  header h1 {
+    font-size: 28px;
+    letter-spacing: 10px;
+    font-weight: 600;
+    color: var(--gold-l);
+    text-shadow: 0 0 22px rgba(211, 188, 142, .55);
+    margin-bottom: 8px;
+  }
 
-#stars{ position:fixed; inset:0; z-index:1; pointer-events:none; }
+  header .sub {
+    font-size: 12px;
+    color: #8d9aad;
+    letter-spacing: 3px;
+  }
 
-/* ================= 场景通用 ================= */
-.scene{
-  position:fixed; inset:0; z-index:3;
-  display:flex; align-items:center; justify-content:center;
-  opacity:0; visibility:hidden;
-  transition:opacity 1s ease, visibility 1s ease;
-}
-.scene.active{ opacity:1; visibility:visible; }
+  .banner {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(107, 74, 24, .32), rgba(60, 40, 90, .28));
+    border: 1px solid rgba(211, 188, 142, .22);
+    margin-bottom: 16px;
+  }
 
-/* ================= 封面 ================= */
-#cover{ flex-direction:column; text-align:center; padding:24px; }
+  .b-item { display: flex; align-items: center; gap: 8px; }
 
-.hero-star{
-  position:relative;
-  width:clamp(120px,22vw,190px);
-  aspect-ratio:1;
-  display:grid; place-items:center;
-  margin-bottom:clamp(26px,5vh,52px);
-  opacity:0;
-  animation:starIn 1.4s cubic-bezier(.22,1.2,.36,1) .2s forwards;
-}
-@keyframes starIn{
-  from{ opacity:0; transform:scale(.5) rotate(-40deg); }
-  to  { opacity:1; transform:scale(1) rotate(0); }
-}
+  .b-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
 
-.hero-star svg{ width:100%; height:100%; display:block; }
-.star-core{
-  animation:pulse 3.4s ease-in-out infinite;
-  transform-box:view-box;
-  transform-origin:center;
-}
-@keyframes pulse{
-  0%,100%{ transform:scale(1); opacity:1; }
-  50%    { transform:scale(1.09); opacity:.88; }
-}
-.orbit{
-  transform-box:view-box;
-  transform-origin:center;
-  animation:spin 22s linear infinite;
-}
-.orbit.rev{ animation:spin 16s linear infinite reverse; }
-@keyframes spin{ to{ transform:rotate(360deg); } }
+  .b-tag.gold {
+    background: linear-gradient(135deg, #ff9c2b, #ffd166);
+    color: #3a2400;
+  }
 
-.cover-title{
-  font-size:clamp(38px,8.5vw,74px);
-  font-weight:800;
-  letter-spacing:.12em;
-  background:linear-gradient(120deg,#ffffff 0%,#b9a8ff 34%,#5fd0ff 62%,#ff8fd0 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  filter:drop-shadow(0 0 32px rgba(139,123,255,.55));
-  display:flex; gap:.08em; justify-content:center;
-  line-height:1.2;
-}
-.cover-title span{
-  display:inline-block;
-  opacity:0;
-  transform:translateY(30px) scale(.8);
-  animation:charUp .9s cubic-bezier(.22,1.3,.4,1) forwards;
-}
-.cover-title span:nth-child(1){ animation-delay:.5s; }
-.cover-title span:nth-child(2){ animation-delay:.64s; }
-.cover-title span:nth-child(3){ animation-delay:.78s; }
-.cover-title span:nth-child(4){ animation-delay:.92s; }
-@keyframes charUp{
-  to{ opacity:1; transform:translateY(0) scale(1); }
-}
+  .b-tag.purple {
+    background: linear-gradient(135deg, #8b4fd4, #c39bf5);
+    color: #1d1030;
+  }
 
-.cover-sub{
-  margin-top:18px;
-  font-size:clamp(12px,2.3vw,15px);
-  letter-spacing:.42em; text-indent:.42em;
-  color:var(--text-dim);
-  opacity:0;
-  animation:softUp .9s ease 1.25s forwards;
-}
-@keyframes softUp{
-  from{ opacity:0; transform:translateY(14px); }
-  to  { opacity:1; transform:translateY(0); }
-}
+  .b-name { font-size: 14px; color: #ecdfc4; letter-spacing: 1px; }
+  .b-name.small { font-size: 12.5px; color: #c4b8d8; }
 
-/* ================= 按钮 ================= */
-.btn{
-  position:relative;
-  margin-top:clamp(34px,6vh,54px);
-  padding:16px 52px;
-  border:1px solid rgba(185,168,255,.42);
-  border-radius:100px;
-  cursor:pointer;
-  font-family:var(--font);
-  font-size:clamp(14px,2.4vw,16px);
-  font-weight:600;
-  letter-spacing:.34em; text-indent:.34em;
-  color:#fff;
-  background:linear-gradient(135deg, rgba(139,123,255,.34), rgba(95,208,255,.20));
-  -webkit-backdrop-filter:blur(14px);
-  backdrop-filter:blur(14px);
-  box-shadow:
-    0 0 34px rgba(139,123,255,.42),
-    inset 0 1px 0 rgba(255,255,255,.24);
-  overflow:hidden;
-  transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s, border-color .35s;
-  opacity:0;
-  animation:softUp .9s ease 1.5s forwards;
-}
-.btn::before{
-  content:'';
-  position:absolute; top:0; left:-120%;
-  width:60%; height:100%;
-  background:linear-gradient(100deg, transparent, rgba(255,255,255,.4), transparent);
-  transform:skewX(-20deg);
-  animation:sheen 3.6s ease-in-out infinite 2s;
-}
-@keyframes sheen{
-  0%  { left:-120%; }
-  45% { left:130%; }
-  100%{ left:130%; }
-}
-.btn:hover{
-  transform:translateY(-4px) scale(1.05);
-  border-color:rgba(185,168,255,.8);
-  box-shadow:
-    0 0 60px rgba(139,123,255,.75),
-    0 0 110px rgba(95,208,255,.3),
-    inset 0 1px 0 rgba(255,255,255,.34);
-}
-.btn:active{ transform:translateY(0) scale(.97); }
+  .stage {
+    position: relative;
+    min-height: 340px;
+    padding: 22px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .025);
+    border: 1px solid rgba(211, 188, 142, .15);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    perspective: 900px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
 
-/* ================= 主场景 ================= */
-#main{ padding:20px; }
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(211, 188, 142, .08), transparent 65%);
+    pointer-events: none;
+  }
 
-.main-inner{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:clamp(22px,4.4vh,50px);
-  width:100%;
-  max-width:900px;
-}
+  .stage .hint {
+    color: #5c6a7d;
+    font-size: 14px;
+    letter-spacing: 3px;
+  }
 
-/* ---------- 玻璃卡片 ---------- */
-.card{
-  position:relative;
-  width:min(480px,90vw);
-  padding:clamp(34px,6vw,54px) clamp(26px,5vw,46px);
-  border-radius:28px;
-  text-align:center;
-  background:linear-gradient(150deg, rgba(255,255,255,.085), rgba(255,255,255,.03));
-  border:1px solid rgba(185,168,255,.26);
-  -webkit-backdrop-filter:blur(22px);
-  backdrop-filter:blur(22px);
-  box-shadow:
-    0 0 70px rgba(139,123,255,.24),
-    inset 0 1px 0 rgba(255,255,255,.18);
-  opacity:0;
-  transform:translateY(36px) scale(.94);
-  transition:opacity 1s ease .9s, transform 1.1s cubic-bezier(.22,1.1,.36,1) .9s;
-}
-#main.show .card{ opacity:1; transform:translateY(0) scale(1); }
+  .card {
+    position: relative;
+    width: 88px;
+    height: 136px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 4px 11px;
+    overflow: hidden;
+    background: linear-gradient(170deg, #2b3a52, #141d2b);
+    border: 1px solid rgba(255, 255, 255, .12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+    animation: cardIn .55s cubic-bezier(.22, 1.2, .4, 1) backwards;
+    user-select: none;
+  }
 
-.card::before{
-  content:'';
-  position:absolute; inset:-1px;
-  border-radius:28px;
-  padding:1px;
-  background:linear-gradient(140deg, rgba(185,168,255,.6), transparent 42%, rgba(95,208,255,.5));
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-  mask-composite:exclude;
-  pointer-events:none;
-  opacity:.75;
-}
+  @keyframes cardIn {
+    0%   { opacity: 0; transform: translateY(20px) scale(.7) rotateY(80deg); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotateY(0); }
+  }
 
-/* 卡片内飘浮的星点装饰 */
-.card-star{
-  position:absolute;
-  border-radius:50%;
-  pointer-events:none;
-  animation:cardTw 3s ease-in-out infinite;
-}
-@keyframes cardTw{
-  0%,100%{ opacity:.25; transform:scale(.75); }
-  50%    { opacity:1; transform:scale(1.3); }
-}
+  .card-name {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    z-index: 2;
+    margin-bottom: 7px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .9);
+    word-break: break-all;
+  }
 
-.card-greet{
-  font-size:clamp(10px,1.7vw,12px);
-  letter-spacing:.46em; text-indent:.46em;
-  color:var(--text-dim);
-  font-weight:600;
-}
+  .card-star {
+    font-size: 9px;
+    letter-spacing: 1px;
+    z-index: 2;
+  }
 
-.card-name{
-  margin:16px 0 8px;
-  font-size:clamp(30px,5.8vw,50px);
-  font-weight:800;
-  letter-spacing:.05em;
-  line-height:1.25;
-  background:linear-gradient(120deg,#ffffff,#b9a8ff 38%,#5fd0ff 68%,#ff8fd0 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  filter:drop-shadow(0 0 26px rgba(139,123,255,.62));
-  word-break:break-word;
-}
+  .card.r3 {
+    background: linear-gradient(170deg, #2d4666, #121b28);
+    border-color: rgba(107, 167, 224, .35);
+  }
+  .card.r3 .card-star { color: #6ba7e0; }
 
-.card-bday{
-  font-size:clamp(13px,2.2vw,16px);
-  letter-spacing:.34em; text-indent:.34em;
-  color:var(--gold);
-  font-weight:600;
-  text-shadow:0 0 20px rgba(255,217,139,.5);
-}
+  .card.r4 {
+    background: linear-gradient(170deg, #4a2f6e, #1b1128);
+    border-color: rgba(181, 126, 245, .5);
+    box-shadow: 0 0 14px rgba(162, 86, 225, .35), 0 4px 14px rgba(0, 0, 0, .5);
+  }
+  .card.r4 .card-star { color: #b57ef5; }
 
-.card-line{
-  width:72px; height:1px;
-  margin:26px auto;
-  background:linear-gradient(90deg, transparent, rgba(185,168,255,.9), transparent);
-}
+  .card.r5 {
+    background: linear-gradient(170deg, #6b4a18, #291b07);
+    border-color: rgba(255, 200, 100, .75);
+    box-shadow: 0 0 18px rgba(255, 177, 63, .6), 0 4px 14px rgba(0, 0, 0, .5);
+  }
+  .card.r5 .card-star { color: #ffd77a; }
 
-.card-verse{
-  font-size:clamp(13px,2vw,15.5px);
-  line-height:2.05;
-  letter-spacing:.09em;
-  color:#d5cfff;
-  min-height:3.1em;
-  transition:opacity .4s ease;
-}
+  .card.r5::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    box-shadow: inset 0 0 26px rgba(255, 177, 63, .35);
+    animation: pulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+  }
 
-.card-sign{
-  margin-top:26px;
-  font-size:clamp(10px,1.6vw,12px);
-  letter-spacing:.26em;
-  color:var(--text-dim);
-  opacity:.8;
-}
+  @keyframes pulse {
+    0%, 100% { opacity: .45; }
+    50%      { opacity: 1; }
+  }
 
-/* ================= 转场闪光 ================= */
-#flash{
-  position:fixed; left:50%; top:50%;
-  width:80px; height:80px;
-  margin:-40px 0 0 -40px;
-  border-radius:50%;
-  background:radial-gradient(circle, #ffffff 0%, #c9bcff 30%, rgba(139,123,255,.5) 52%, rgba(139,123,255,0) 72%);
-  transform:scale(0);
-  opacity:0;
-  pointer-events:none;
-  z-index:100;
-  transition:transform 1s cubic-bezier(.35,0,.75,.5), opacity .5s ease;
-}
-#flash.bloom{ transform:scale(46); opacity:1; }
-#flash.fade{ opacity:0; transition:opacity .95s ease; }
+  .up-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 3;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 2px 6px;
+    border-radius: 0 8px 0 8px;
+    background: linear-gradient(135deg, #ff9c2b, #ffd166);
+    color: #3a2400;
+  }
 
-/* ================= 响应式 ================= */
-@media (max-width: 560px){
-  .card{ width:92vw; padding:30px 22px 34px; }
-  .card-line{ margin:20px auto; }
-  .card-sign{ margin-top:20px; }
-  .main-inner{ gap:clamp(18px,3.4vh,34px); }
-}
+  .std-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 3;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 2px 6px;
+    border-radius: 0 8px 0 8px;
+    background: linear-gradient(135deg, #5a6a80, #8a9bb5);
+    color: #0d1420;
+  }
 
-@media (max-height: 680px){
-  .hero-star{ width:clamp(96px,18vw,130px); margin-bottom:20px; }
-  .card{ padding:24px 22px 28px; }
-  .card-line{ margin:16px auto; }
-  .card-sign{ margin-top:16px; }
-  .btn{ padding:13px 42px; margin-top:26px; }
-}
+  .guarantee {
+    text-align: center;
+    font-size: 12.5px;
+    letter-spacing: 1px;
+    color: #8d9aad;
+    padding: 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .025);
+    border: 1px solid rgba(211, 188, 142, .12);
+    margin-bottom: 14px;
+    transition: .3s;
+  }
+
+  .guarantee.big {
+    color: #ffd77a;
+    border-color: rgba(255, 177, 63, .5);
+    background: rgba(255, 177, 63, .08);
+    box-shadow: 0 0 16px rgba(255, 177, 63, .2) inset;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 9px 4px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid rgba(211, 188, 142, .12);
+  }
+
+  .stat .k { font-size: 11px; color: #7d8a9c; }
+  .stat .v { font-size: 15px; font-weight: 700; color: #e8e0d0; }
+  .stat .v.c5 { color: var(--r5); }
+  .stat .v.c4 { color: var(--r4); }
+  .stat .v.c3 { color: var(--r3); }
+  .stat .v.up { color: #ffd77a; }
+  .stat .v.std { color: #a0b4cc; }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 2px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    border: 1px solid rgba(211, 188, 142, .5);
+    background: linear-gradient(180deg, #34445c, #1b2433);
+    color: var(--gold-l);
+    cursor: pointer;
+    transition: .2s;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
+  }
+
+  .btn:hover:not(:disabled) {
+    border-color: var(--gold-l);
+    box-shadow: 0 0 18px rgba(211, 188, 142, .45);
+    transform: translateY(-2px);
+  }
+
+  .btn:active:not(:disabled) { transform: translateY(0) scale(.97); }
+
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn.primary {
+    background: linear-gradient(180deg, #6b5424, #3a2b0e);
+    border-color: rgba(255, 215, 140, .7);
+    color: #ffe6b0;
+  }
+
+  .btn.ghost {
+    background: transparent;
+    color: #7d8a9c;
+    border-color: rgba(125, 138, 156, .35);
+  }
+
+  .flash {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 45%, rgba(255, 220, 150, .55), rgba(255, 177, 63, 0) 65%);
+    animation: flashOut .9s ease-out forwards;
+  }
+
+  @keyframes flashOut {
+    0%   { opacity: 0; }
+    18%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .footnote {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #4e5a6b;
+  }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 22px; letter-spacing: 6px; }
+    .stage { padding: 14px; gap: 8px; min-height: 300px; }
+    .card { width: 72px; height: 114px; }
+    .card-name { font-size: 10px; margin-bottom: 5px; }
+    .card-star { font-size: 8px; }
+    .btn { padding: 11px 20px; font-size: 14px; letter-spacing: 1px; }
+    .stats { grid-template-columns: repeat(4, 1fr); }
+    .stat .v { font-size: 13px; }
+  }
 </style>
 </head>
-
 <body>
+<div class="wrap">
 
-<!-- 深空背景 -->
-<div class="space">
-  <div class="nebula a"></div>
-  <div class="nebula b"></div>
-  <div class="nebula c"></div>
-</div>
+  <header>
+    <h1>祈 愿</h1>
+    <p class="sub">7.1版本 · 往冥府的安魂歌</p>
+  </header>
 
-<!-- 星空画布 -->
-<canvas id="stars"></canvas>
-
-<!-- ================= 封面 ================= -->
-<section id="cover" class="scene active">
-
-  <div class="hero-star">
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <radialGradient id="coreG">
-          <stop offset="0%"   stop-color="#ffffff"/>
-          <stop offset="38%"  stop-color="#c9bcff"/>
-          <stop offset="72%"  stop-color="#8b7bff" stop-opacity=".55"/>
-          <stop offset="100%" stop-color="#8b7bff" stop-opacity="0"/>
-        </radialGradient>
-        <linearGradient id="sparkG" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%"   stop-color="#ffffff"/>
-          <stop offset="55%"  stop-color="#c9bcff"/>
-          <stop offset="100%" stop-color="#5fd0ff"/>
-        </linearGradient>
-        <filter id="soft">
-          <feGaussianBlur stdDeviation="3"/>
-        </filter>
-      </defs>
-
-      <!-- 外圈光晕 -->
-      <circle cx="100" cy="100" r="86" fill="url(#coreG)" opacity=".55"/>
-      <circle cx="100" cy="100" r="64" fill="url(#coreG)" opacity=".7"/>
-
-      <!-- 旋转星环 -->
-      <g class="orbit" opacity=".75">
-        <ellipse cx="100" cy="100" rx="88" ry="30" fill="none"
-                 stroke="rgba(185,168,255,.55)" stroke-width="1.2"/>
-        <circle cx="188" cy="100" r="3.4" fill="#5fd0ff" filter="url(#soft)"/>
-        <circle cx="12"  cy="100" r="2.4" fill="#ff8fd0" filter="url(#soft)"/>
-      </g>
-      <g class="orbit rev" opacity=".6">
-        <ellipse cx="100" cy="100" rx="30" ry="88" fill="none"
-                 stroke="rgba(95,208,255,.42)" stroke-width="1.2"/>
-        <circle cx="100" cy="188" r="3"   fill="#ffd98b" filter="url(#soft)"/>
-        <circle cx="100" cy="12"  r="2.2" fill="#c9bcff" filter="url(#soft)"/>
-      </g>
-
-      <!-- 四角星光 -->
-      <g class="star-core" fill="url(#sparkG)">
-        <path d="M100 22 C 108 76, 124 92, 178 100 C 124 108, 108 124, 100 178
-                 C 92 124, 76 108, 22 100 C 76 92, 92 76, 100 22 Z"/>
-      </g>
-      <circle cx="100" cy="100" r="9" fill="#ffffff" opacity=".95"/>
-    </svg>
-  </div>
-
-  <h1 class="cover-title">
-    <span>生</span><span>日</span><span>快</span><span>乐</span>
-  </h1>
-  <p class="cover-sub">点亮整片星空</p>
-
-  <button class="btn" id="openBtn" type="button">点亮</button>
-</section>
-
-<!-- ================= 主场景 ================= -->
-<section id="main" class="scene">
-  <div class="main-inner">
-
-    <!-- 玻璃卡片 -->
-    <div class="card">
-      <!-- 卡片内星点装饰 -->
-      <span class="card-star" style="width:4px;height:4px;left:14%;top:18%;background:#ffd98b;box-shadow:0 0 10px #ffd98b;animation-delay:.2s;"></span>
-      <span class="card-star" style="width:3px;height:3px;right:12%;top:26%;background:#5fd0ff;box-shadow:0 0 10px #5fd0ff;animation-delay:.9s;"></span>
-      <span class="card-star" style="width:3.5px;height:3.5px;left:20%;bottom:22%;background:#ff8fd0;box-shadow:0 0 10px #ff8fd0;animation-delay:1.5s;"></span>
-      <span class="card-star" style="width:2.8px;height:2.8px;right:18%;bottom:16%;background:#c9bcff;box-shadow:0 0 10px #c9bcff;animation-delay:.6s;"></span>
-
-      <p class="card-greet">HAPPY BIRTHDAY</p>
-      <h2 class="card-name" id="nameText">魏</h2>
-      <div class="card-bday">生 日 快 乐</div>
-      <div class="card-line"></div>
-      <p class="card-verse" id="verseText">愿你的每个愿望，都有一颗星在回应</p>
-      <div class="card-sign">— 来自星空的祝福 —</div>
+  <div class="banner">
+    <div class="b-item">
+      <span class="b-tag gold">五星 UP</span>
+      <span class="b-name">薇斯纳 · 沃雅妮莎</span>
     </div>
-
-    <button class="btn" id="wishBtn" type="button">许 愿</button>
-
+    <div class="b-item">
+      <span class="b-tag purple">四星 UP</span>
+      <span class="b-name small">迪奥娜 · 重云 · 珐露珊</span>
+    </div>
   </div>
-</section>
 
-<!-- 转场闪光 -->
-<div id="flash"></div>
+  <div class="stage" id="stage">
+    <p class="hint">点击下方按钮开始祈愿</p>
+  </div>
+
+  <div class="guarantee" id="guarantee">小保底 · 下次五星有 50% 概率为 UP 角色</div>
+
+  <div class="stats">
+    <div class="stat"><span class="k">总抽数</span><span class="v" id="s-total">0</span></div>
+    <div class="stat"><span class="k">五星</span><span class="v c5" id="s-5">0</span></div>
+    <div class="stat"><span class="k">五星UP</span><span class="v up" id="s-5up">0</span></div>
+    <div class="stat"><span class="k">五星常驻</span><span class="v std" id="s-5std">0</span></div>
+    <div class="stat"><span class="k">四星</span><span class="v c4" id="s-4">0</span></div>
+    <div class="stat"><span class="k">三星</span><span class="v c3" id="s-3">0</span></div>
+    <div class="stat"><span class="k">五星率</span><span class="v" id="s-rate">0.00%</span></div>
+    <div class="stat"><span class="k">保底进度</span><span class="v" id="s-pity">0 / 90</span></div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="pull1">祈愿 ×1</button>
+    <button class="btn primary" id="pull10">祈愿 ×10</button>
+    <button class="btn ghost" id="reset">重置</button>
+  </div>
+
+  <p class="footnote">
+    五星基础概率 0.6%（第 74 抽起递增，90 抽必出）· 四星基础概率 5.1%，10 抽保底<br>
+    本页面仅供娱乐，与官方无关
+  </p>
+
+</div>
 
 <script>
 (function () {
   'use strict';
 
-  /* ==================== 配置区（可自由修改） ==================== */
-  const params = new URLSearchParams(location.search);
-
-  const CONFIG = {
-    // ?name=魏
-    name: params.get('name') || '魏 同 学   ',
-    // ?verse=自定义祝福
-    verse: params.get('verse') || '',
-    wishes: [
-      '愿你的每个愿望，都有一颗星在回应',
-      '愿你如星辰，自有万丈光芒',
-      '愿你所求皆如愿，所行化坦途',
-      '愿你眼里有星河，心中有山海',
-      '愿你此后年年，都被温柔以待',
-      '愿你所有热爱，都能得偿所愿',
-      '愿你前路璀璨，夜色永不漫长',
-      '愿你平安喜乐，岁岁皆有今朝'
+  /* ================= 卡池数据 · 7.1版本 ================= */
+  const POOL = {
+    r5up: ['薇斯纳', '沃雅妮莎'],
+    r5std: ['琴', '迪卢克', '莫娜', '刻晴', '七七', '提纳里', '迪希雅', '梦见月瑞希'],
+    r4up: ['迪奥娜', '重云', '珐露珊'],
+    r4std: [
+      '安柏', '凯亚', '丽莎', '香菱', '北斗', '行秋', '重云', '诺艾尔', '班尼特',
+      '菲谢尔', '砂糖', '雷泽', '芭芭拉', '罗莎莉亚', '辛焱', '迪奥娜', '烟绯',
+      '早柚', '云堇', '鹿野院平藏', '久岐忍', '多莉', '坎蒂丝', '莱依拉', '米卡',
+      '绮良良', '卡维', '珐露珊',
+      '祭礼剑', '笛剑', '匣里龙吟', '西风剑', '祭礼大剑', '雨裁', '钟剑',
+      '西风大剑', '西风长枪', '匣里灭辰', '试作星镰', '弓藏', '绝弦',
+      '西风猎弓', '祭礼弓', '祭礼残章', '流浪乐章', '西风秘典'
+    ],
+    r3: [
+      '冷刃', '黎明神剑', '飞天御剑', '暗铁剑', '吃虎鱼刀', '旅行剑',
+      '沐浴龙血的剑', '铁影阔剑', '白铁大剑', '石英大剑', '以理服人',
+      '白缨枪', '黑缨枪', '翡玉法球', '讨龙英杰谭', '魔导绪论', '甲级宝珏',
+      '鸦羽弓', '神射手之誓', '弹弓', '黑檀弓', '信使'
     ]
   };
-  /* ============================================================ */
 
-  const $ = (s) => document.querySelector(s);
+  /* ================= 状态 ================= */
+  const state = {
+    total: 0,
+    pity5: 0,
+    pity4: 0,
+    guarantee5: false,
+    guarantee4: false,
+    count5: 0,
+    count5up: 0,    // 五星UP计数
+    count5std: 0,   // 五星常驻计数
+    count4: 0,
+    count3: 0
+  };
 
-  const cover  = $('#cover');
-  const main   = $('#main');
-  const openBtn= $('#openBtn');
-  const wishBtn= $('#wishBtn');
-  const nameEl = $('#nameText');
-  const verseEl= $('#verseText');
-  const flash  = $('#flash');
+  let busy = false;
 
-  /* ---------- 名字与祝福 ---------- */
-  nameEl.textContent = CONFIG.name;
-  const nLen = CONFIG.name.length;
-  if (nLen > 10)      nameEl.style.fontSize = 'clamp(20px,3.4vw,28px)';
-  else if (nLen > 7)  nameEl.style.fontSize = 'clamp(23px,4.2vw,34px)';
-  else if (nLen > 5)  nameEl.style.fontSize = 'clamp(26px,4.8vw,40px)';
+  const $ = id => document.getElementById(id);
+  const stage = $('stage');
 
-  const pool = CONFIG.verse ? [CONFIG.verse].concat(CONFIG.wishes) : CONFIG.wishes.slice();
-  let wishIndex = 0;
-  verseEl.textContent = pool[0];
+  /* ================= 抽卡核心 ================= */
 
-  /* ==================== 音效（Web Audio 合成） ==================== */
-  let audioCtx = null;
-
-  function tone(freq, dur, type, vol, delay) {
-    try {
-      if (!audioCtx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return;
-        audioCtx = new AC();
-      }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
-      const t0 = audioCtx.currentTime + (delay || 0);
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const lp = audioCtx.createBiquadFilter();
-
-      osc.type = type || 'sine';
-      osc.frequency.setValueAtTime(freq, t0);
-
-      lp.type = 'lowpass';
-      lp.frequency.setValueAtTime(3600, t0);
-
-      const v = vol == null ? 0.08 : vol;
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(v, t0 + 0.018);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + (dur || 1.1));
-
-      osc.connect(lp);
-      lp.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start(t0);
-      osc.stop(t0 + (dur || 1.1) + 0.05);
-    } catch (e) { /* 静默失败 */ }
+  function rate5(pity) {
+    if (pity >= 90) return 1;
+    if (pity <= 73) return 0.006;
+    return Math.min(1, 0.006 + 0.06 * (pity - 73));
   }
 
-  // 柔和琶音
-  function chord() {
-    const notes = [523.25, 659.25, 783.99, 1046.50];
-    notes.forEach(function (f, i) {
-      tone(f, 1.5, 'sine', 0.06, i * 0.10);
-    });
-  }
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
-  // 单音星光
-  function chime() {
-    const scale = [587.33, 698.46, 880.00, 1046.50, 1174.66];
-    tone(scale[Math.floor(Math.random() * scale.length)], 1.3, 'triangle', 0.05, 0);
-  }
+  function pullOne() {
+    state.total++;
+    state.pity5++;
+    state.pity4++;
 
-  /* ==================== 星空画布 ==================== */
-  const canvas = $('#stars');
-  const ctx = canvas.getContext('2d');
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    /* --- 五星判定 --- */
+    if (Math.random() < rate5(state.pity5)) {
+      state.pity5 = 0;
+      state.count5++;
 
-  let VW = 0, VH = 0;
-
-  const stars   = [];   // 背景星
-  const meteors = [];   // 流星
-  const sparks  = [];   // 星尘火花
-
-  function resize() {
-    VW = window.innerWidth;
-    VH = window.innerHeight;
-    canvas.width  = Math.floor(VW * DPR);
-    canvas.height = Math.floor(VH * DPR);
-    canvas.style.width  = VW + 'px';
-    canvas.style.height = VH + 'px';
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  }
-
-  function initStars() {
-    stars.length = 0;
-    const count = Math.max(90, Math.min(300, Math.round(VW * VH / 5200)));
-    for (let i = 0; i < count; i++) {
-      stars.push({
-        x: Math.random() * VW,
-        y: Math.random() * VH,
-        r: 0.3 + Math.random() * 1.5,
-        a: 0.2 + Math.random() * 0.65,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.5 + Math.random() * 1.6,
-        cool: Math.random() < 0.22,          // 偏冷色
-        warm: Math.random() < 0.12           // 偏暖色
-      });
-    }
-  }
-
-  function spawnMeteor() {
-    const fromLeft = Math.random() < 0.55;
-    const speed = 7 + Math.random() * 7;
-    const ang = fromLeft ? (Math.PI * 0.22) : (Math.PI * 0.78);
-
-    meteors.push({
-      x: fromLeft ? -80 : VW + 80,
-      y: Math.random() * VH * 0.55,
-      vx: Math.cos(ang) * speed,
-      vy: Math.sin(ang) * speed,
-      len: 90 + Math.random() * 120,
-      life: 1,
-      decay: 0.007 + Math.random() * 0.006,
-      hue: Math.random() < 0.5 ? 265 : 195
-    });
-  }
-
-  function addSpark(x, y, count) {
-    const hues = [265, 200, 320, 45];
-    const n = count || 14;
-    for (let i = 0; i < n; i++) {
-      const ang = Math.random() * Math.PI * 2;
-      const sp = 1 + Math.random() * 4.2;
-      sparks.push({
-        x: x, y: y,
-        vx: Math.cos(ang) * sp,
-        vy: Math.sin(ang) * sp,
-        r: 1 + Math.random() * 2.6,
-        life: 1,
-        decay: 0.014 + Math.random() * 0.022,
-        hue: hues[Math.floor(Math.random() * hues.length)]
-      });
-    }
-  }
-
-  let last = 0;
-
-  function render(now) {
-    const t = now / 1000;
-    const dt = Math.min((now - last) / 16.67 || 1, 3);
-    last = now;
-
-    ctx.clearRect(0, 0, VW, VH);
-
-    /* ---- 背景星 ---- */
-    for (let i = 0; i < stars.length; i++) {
-      const s = stars[i];
-      const tw = 0.62 + 0.38 * Math.sin(t * s.speed + s.phase);
-      const alpha = s.a * tw;
-
-      ctx.globalAlpha = alpha;
-
-      if (s.r > 1.15) {
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = s.cool ? '#8fd8ff' : (s.warm ? '#ffd98b' : '#ffffff');
+      let name, isUp = false;
+      if (state.guarantee5 || Math.random() < 0.5) {
+        name = pick(POOL.r5up);
+        state.guarantee5 = false;
+        isUp = true;
+        state.count5up++;
       } else {
-        ctx.shadowBlur = 0;
+        name = pick(POOL.r5std);
+        state.guarantee5 = true;
+        state.count5std++;
       }
-
-      ctx.fillStyle = s.cool ? '#c8e9ff' : (s.warm ? '#ffe9b8' : '#ffffff');
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fill();
+      return { name, rarity: 5, isUp };
     }
-    ctx.shadowBlur = 0;
 
-    /* ---- 流星 ---- */
-    for (let i = meteors.length - 1; i >= 0; i--) {
-      const m = meteors[i];
-      m.x += m.vx * dt;
-      m.y += m.vy * dt;
-      m.life -= m.decay * dt;
+    /* --- 四星判定 --- */
+    const p4 = state.pity4 >= 10 ? 1 : 0.051;
+    if (Math.random() < p4) {
+      state.pity4 = 0;
+      state.count4++;
 
-      if (m.life <= 0 || m.x < -300 || m.x > VW + 300 || m.y > VH + 300) {
-        meteors.splice(i, 1);
-        continue;
+      let name, isUp = false;
+      if (state.guarantee4 || Math.random() < 0.5) {
+        name = pick(POOL.r4up);
+        state.guarantee4 = false;
+        isUp = true;
+      } else {
+        name = pick(POOL.r4std);
+        state.guarantee4 = true;
       }
-
-      const norm = Math.sqrt(m.vx * m.vx + m.vy * m.vy) || 1;
-      const ux = m.vx / norm, uy = m.vy / norm;
-      const tailX = m.x - ux * m.len;
-      const tailY = m.y - uy * m.len;
-
-      const grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
-      const col = 'hsl(' + m.hue + ',100%,78%)';
-      grad.addColorStop(0, 'hsla(' + m.hue + ',100%,92%,' + (m.life * 0.95) + ')');
-      grad.addColorStop(0.35, 'hsla(' + m.hue + ',100%,76%,' + (m.life * 0.5) + ')');
-      grad.addColorStop(1, 'hsla(' + m.hue + ',100%,70%,0)');
-
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = 2.2;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(m.x, m.y);
-      ctx.lineTo(tailX, tailY);
-      ctx.stroke();
-
-      ctx.globalAlpha = m.life;
-      ctx.shadowBlur = 18;
-      ctx.shadowColor = col;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(m.x, m.y, 2.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = 1;
+      return { name, rarity: 4, isUp };
     }
 
-    /* ---- 星尘火花 ---- */
-    for (let i = sparks.length - 1; i >= 0; i--) {
-      const p = sparks[i];
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vx *= 0.945;
-      p.vy = p.vy * 0.945 + 0.035;
-      p.life -= p.decay * dt;
-
-      if (p.life <= 0) { sparks.splice(i, 1); continue; }
-
-      ctx.globalAlpha = Math.max(0, p.life) * 0.9;
-      ctx.shadowBlur = 14;
-      ctx.shadowColor = 'hsl(' + p.hue + ',100%,72%)';
-      ctx.fillStyle = 'hsl(' + p.hue + ',100%,82%)';
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * (0.35 + p.life * 0.65), 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-
-    requestAnimationFrame(render);
+    /* --- 三星 --- */
+    state.count3++;
+    return { name: pick(POOL.r3), rarity: 3, isUp: false };
   }
 
-  resize();
-  initStars();
-  requestAnimationFrame(render);
+  /* ================= 渲染 ================= */
 
-  let rzTimer = null;
-  window.addEventListener('resize', function () {
-    clearTimeout(rzTimer);
-    rzTimer = setTimeout(function () {
-      resize();
-      initStars();
-    }, 180);
-  });
+  function render(results) {
+    stage.innerHTML = '';
+    const frag = document.createDocumentFragment();
 
-  /* ==================== 交互：点亮星空 ==================== */
-  let opened = false;
+    results.forEach((item, i) => {
+      const card = document.createElement('div');
+      card.className = 'card r' + item.rarity;
+      card.style.animationDelay = (i * 0.08) + 's';
 
-  function openInvitation() {
-    if (opened) return;
-    opened = true;
+      let tag = '';
+      if (item.rarity === 5 && item.isUp) tag = '<span class="up-tag">UP</span>';
+      if (item.rarity === 5 && !item.isUp) tag = '<span class="std-tag">常驻</span>';
 
-    chord();
-    flash.classList.add('bloom');
+      card.innerHTML =
+        tag +
+        '<span class="card-name">' + item.name + '</span>' +
+        '<span class="card-star">' + '★'.repeat(item.rarity) + '</span>';
+      frag.appendChild(card);
+    });
 
-    // 转场中撒几颗流星
-    setTimeout(function () { spawnMeteor(); }, 420);
-    setTimeout(function () { spawnMeteor(); }, 780);
-
-    setTimeout(function () {
-      cover.classList.remove('active');
-      main.classList.add('active');
-
-      requestAnimationFrame(function () {
-        main.classList.add('show');
-      });
-    }, 720);
-
-    setTimeout(function () { flash.classList.add('fade'); }, 900);
-    setTimeout(function () { flash.style.display = 'none'; }, 2000);
+    stage.appendChild(frag);
   }
 
-  openBtn.addEventListener('click', openInvitation);
+  function updateStats() {
+    $('s-total').textContent = state.total;
+    $('s-5').textContent = state.count5;
+    $('s-5up').textContent = state.count5up;
+    $('s-5std').textContent = state.count5std;
+    $('s-4').textContent = state.count4;
+    $('s-3').textContent = state.count3;
+    $('s-rate').textContent =
+      (state.total ? (state.count5 / state.total * 100) : 0).toFixed(2) + '%';
+    $('s-pity').textContent = state.pity5 + ' / 90';
 
-  /* ==================== 交互：许愿 ==================== */
-  wishBtn.addEventListener('click', function () {
-    chime();
-    spawnMeteor();
-    setTimeout(spawnMeteor, 260);
-
-    // 从按钮位置升起星尘
-    const rect = wishBtn.getBoundingClientRect();
-    addSpark(rect.left + rect.width / 2, rect.top + rect.height / 2, 20);
-    addSpark(VW / 2, VH * 0.42, 26);
-
-    // 切换祝福语
-    wishIndex = (wishIndex + 1) % pool.length;
-    verseEl.style.opacity = '0';
-
-    setTimeout(function () {
-      verseEl.textContent = pool[wishIndex];
-      verseEl.style.opacity = '1';
-    }, 380);
-  });
-
-  /* ==================== 交互：点击星尘 ==================== */
-  document.addEventListener('pointerdown', function (e) {
-    if (!opened) return;
-    addSpark(e.clientX, e.clientY, 12);
-    if (Math.random() < 0.35) tone(880 + Math.random() * 400, 0.5, 'sine', 0.03, 0);
-  }, { passive: true });
-
-  /* ==================== 键盘无障碍 ==================== */
-  document.addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && !opened && document.activeElement === openBtn) {
-      e.preventDefault();
-      openInvitation();
+    const g = $('guarantee');
+    if (state.guarantee5) {
+      g.textContent = '大保底 · 下次五星必定为 UP 角色';
+      g.classList.add('big');
+    } else {
+      g.textContent = '小保底 · 下次五星有 50% 概率为 UP 角色';
+      g.classList.remove('big');
     }
-  });
+  }
 
+  function flash() {
+    const el = document.createElement('div');
+    el.className = 'flash';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+
+  function setBusy(b) {
+    busy = b;
+    ['pull1', 'pull10', 'reset'].forEach(id => { $(id).disabled = b; });
+  }
+
+  /* ================= 交互 ================= */
+
+  function doPull(n) {
+    if (busy) return;
+    setBusy(true);
+
+    const results = [];
+    for (let i = 0; i < n; i++) results.push(pullOne());
+
+    render(results);
+    updateStats();
+
+    if (results.some(r => r.rarity === 5)) flash();
+
+    setTimeout(() => setBusy(false), n * 80 + 450);
+  }
+
+  function reset() {
+    if (busy) return;
+    if (!confirm('确定要清空所有抽卡记录吗？')) return;
+
+    state.total = 0;
+    state.pity5 = 0;
+    state.pity4 = 0;
+    state.guarantee5 = false;
+    state.guarantee4 = false;
+    state.count5 = 0;
+    state.count5up = 0;
+    state.count5std = 0;
+    state.count4 = 0;
+    state.count3 = 0;
+
+    stage.innerHTML = '<p class="hint">点击下方按钮开始祈愿</p>';
+    updateStats();
+  }
+
+  $('pull1').addEventListener('click', () => doPull(1));
+  $('pull10').addEventListener('click', () => doPull(10));
+  $('reset').addEventListener('click', reset);
+
+  updateStats();
 })();
 </script>
 </body>
