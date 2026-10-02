@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f0ebdd">
+<title>生日快乐</title>
+<style>
+  :root{
+    --ink:#1e3a34;
+    --jade:#3f7d6b;
+    --deep:#1c3f38;
+    --seal:#b0392c;
+    --gold:#c9a227;
+    --paper:#fffdf7;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:"Kaiti SC","STKaiti","KaiTi","Songti SC","SimSun","Noto Serif SC",serif;
+    background:#efe9dc;
+    color:var(--ink);
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ============ 场景 ============ */
+  .scene{
+    position:fixed;inset:0;
+    display:flex;
+    overflow:auto;
+    padding:clamp(12px,3vh,36px) clamp(12px,4vw,36px) 130px;
+    z-index:1;
+  }
+
+  .bg{
+    position:fixed;inset:0;
+    width:100%;height:100%;
+    z-index:0;
+    display:block;
+  }
+
+  /* ============ 飘浮金屑 ============ */
+  .particles{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden;}
+  .particles span{
+    position:absolute;
+    bottom:-60px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 32%, #f2dc9a, #b8942f 70%, #8a6c17);
+    box-shadow:0 0 8px rgba(210,175,70,.6);
+    animation-name:floatUp;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    will-change:transform,opacity;
+  }
+  @keyframes floatUp{
+    0%   { transform:translate3d(0,0,0) scale(.5); opacity:0; }
+    12%  { opacity:.85; }
+    85%  { opacity:.55; }
+    100% { transform:translate3d(40px,-118vh,0) scale(1.15); opacity:0; }
+  }
+
+  /* ============ 卡片 ============ */
+  .card-wrap{
+    margin:auto;
+    animation:floatCard 9s 1.4s ease-in-out infinite;
+    z-index:5;
+  }
+  @keyframes floatCard{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%    { transform:translateY(-10px) rotate(-.35deg); }
+  }
+
+  .card{
+    position:relative;
+    width:min(90vw,540px);
+    padding:clamp(32px,6vw,56px) clamp(26px,6vw,56px) clamp(40px,7vw,62px);
+    background:linear-gradient(165deg,#fffdf8 0%,#faf5ea 45%,#f1ebdc 100%);
+    border-radius:4px;
+    overflow:hidden;
+    isolation:isolate;
+    text-align:center;
+    box-shadow:
+      0 44px 80px -34px rgba(12,42,36,.55),
+      0 0 0 1px rgba(28,63,56,.10),
+      0 0 0 9px rgba(255,253,247,.55),
+      0 0 0 10px rgba(201,162,39,.28),
+      0 0 0 22px rgba(255,253,247,.30),
+      0 0 0 23px rgba(201,162,39,.14);
+    animation:cardIn 1.1s cubic-bezier(.2,.85,.25,1) both;
+    transform-origin:50% 60%;
+  }
+  @keyframes cardIn{
+    0%  { opacity:0; transform:translateY(46px) scale(.92); filter:blur(6px); }
+    100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+  }
+
+  /* 宣纸颗粒 */
+  .card::before{
+    content:"";
+    position:absolute;inset:0;
+    pointer-events:none;
+    z-index:0;
+    opacity:.42;
+    mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+  /* 卡片内四角墨线 */
+  .card::after{
+    content:"";
+    position:absolute;inset:14px;
+    border:1px solid rgba(28,63,56,.13);
+    border-radius:2px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .card-body{position:relative;z-index:2;}
+
+  /* 卡片底部的淡墨山影 */
+  .card-mountain{
+    position:absolute;
+    left:0;right:0;bottom:0;
+    width:100%;
+    height:38%;
+    color:#1c3f38;
+    opacity:.075;
+    z-index:1;
+    pointer-events:none;
+  }
+
+  .eyebrow{
+    margin:0 0 1.1em;
+    font-size:clamp(10px,2.6vw,12.5px);
+    letter-spacing:.55em;
+    text-indent:.55em;
+    color:#8a9c93;
+    font-weight:400;
+  }
+
+  .title{
+    margin:.05em 0 .28em;
+    font-size:clamp(40px,10vw,66px);
+    font-weight:700;
+    letter-spacing:.14em;
+    text-indent:.14em;
+    line-height:1.15;
+    background:linear-gradient(178deg,#2f5d52 0%,#16332d 48%,#3f7d6b 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 2px 3px rgba(28,63,56,.13));
+  }
+
+  .rule{
+    width:74px;height:2px;
+    margin:0 auto 1.4em;
+    background:linear-gradient(90deg,transparent,rgba(201,162,39,.85),transparent);
+  }
+
+  .to{
+    margin:.2em 0 .9em;
+    font-size:clamp(16px,3.8vw,20px);
+    letter-spacing:.1em;
+    color:#4c6a61;
+  }
+  .to span{
+    display:inline-block;
+    margin-left:.25em;
+    padding:0 .18em .12em;
+    color:var(--seal);
+    font-weight:700;
+    border-bottom:1px dashed rgba(176,57,44,.42);
+    transition:color .3s;
+  }
+
+  .wish{
+    margin:0 0 2.1em;
+    font-size:clamp(14px,3.1vw,17px);
+    line-height:2.1;
+    letter-spacing:.13em;
+    color:#5a736a;
+  }
+
+  /* 按钮 */
+  .play-btn{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:.62em;
+    padding:.88em 1.9em;
+    font-family:inherit;
+    font-size:clamp(15px,3.3vw,17px);
+    letter-spacing:.14em;
+    text-indent:.14em;
+    color:#f7f4e9;
+    background:linear-gradient(140deg,#35695c,#1c3f38 55%,#3f7d6b);
+    border:1px solid rgba(201,162,39,.5);
+    border-radius:999px;
+    cursor:pointer;
+    overflow:hidden;
+    box-shadow:
+      0 12px 26px -9px rgba(20,48,42,.7),
+      inset 0 1px 0 rgba(255,255,255,.16);
+    transition:transform .28s cubic-bezier(.2,.85,.3,1), box-shadow .28s, filter .28s;
+    -webkit-user-select:none;user-select:none;
+  }
+  .play-btn::before{
+    content:"";
+    position:absolute;
+    top:0;left:-120%;
+    width:60%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);
+    transition:left .7s ease;
+  }
+  .play-btn:hover{ transform:translateY(-2px); box-shadow:0 18px 32px -11px rgba(20,48,42,.8), inset 0 1px 0 rgba(255,255,255,.22); }
+  .play-btn:hover::before{ left:140%; }
+  .play-btn:active{ transform:translateY(0) scale(.975); }
+  .play-btn.playing{ filter:saturate(.75) brightness(1.04); cursor:default; }
+  .play-btn .icon{
+    font-size:1.12em;
+    display:inline-block;
+    line-height:1;
+  }
+  .play-btn.playing .icon{ animation:noteBeat .62s ease-in-out infinite alternate; }
+  @keyframes noteBeat{
+    from{ transform:translateY(0) scale(1); }
+    to  { transform:translateY(-3px) scale(1.16); }
+  }
+
+  /* 印章 */
+  .seal{
+    position:absolute;
+    right:clamp(18px,4.5vw,34px);
+    bottom:clamp(18px,4.5vw,34px);
+    width:clamp(44px,9vw,54px);
+    height:clamp(44px,9vw,54px);
+    display:grid;place-items:center;
+    font-size:clamp(22px,4.6vw,27px);
+    font-weight:700;
+    color:#fff4f0;
+    background:linear-gradient(145deg,#c43f2f,#9c2b1f);
+    border-radius:6px;
+    transform:rotate(-6deg);
+    opacity:.93;
+    z-index:3;
+    text-shadow:0 1px 2px rgba(0,0,0,.25);
+    box-shadow:
+      0 5px 14px rgba(150,45,32,.38),
+      inset 0 0 0 2px rgba(255,255,255,.20),
+      inset 0 0 14px rgba(0,0,0,.18);
+  }
+  .card.playing .seal{ animation:sealPulse .68s ease-in-out infinite alternate; }
+  @keyframes sealPulse{
+    from{ transform:rotate(-6deg) scale(1);
+          box-shadow:0 5px 14px rgba(150,45,32,.38), inset 0 0 0 2px rgba(255,255,255,.20); }
+    to  { transform:rotate(-6deg) scale(1.09);
+          box-shadow:0 8px 24px rgba(176,58,44,.62), inset 0 0 0 2px rgba(255,255,255,.32); }
+  }
+
+  /* ============ 底部输入条 ============ */
+  .name-bar{
+    position:fixed;
+    left:50%;
+    bottom:max(18px, env(safe-area-inset-bottom, 0px));
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:min(88vw,372px);
+    padding:8px 18px;
+    z-index:30;
+    background:rgba(255,253,247,.74);
+    backdrop-filter:blur(12px) saturate(1.2);
+    -webkit-backdrop-filter:blur(12px) saturate(1.2);
+    border:1px solid rgba(28,63,56,.14);
+    border-radius:999px;
+    box-shadow:0 14px 34px -14px rgba(16,44,38,.5), inset 0 1px 0 rgba(255,255,255,.7);
+    animation:barIn .9s .55s cubic-bezier(.2,.85,.3,1) both;
+  }
+  @keyframes barIn{
+    from{ opacity:0; transform:translateX(-50%) translateY(20px); }
+    to  { opacity:1; transform:translateX(-50%) translateY(0); }
+  }
+  .name-bar .brush{
+    flex:0 0 auto;
+    width:9px;height:9px;
+    border-radius:50%;
+    background:radial-gradient(circle at 34% 34%, #d94a37, #8f251a);
+    box-shadow:0 0 0 3px rgba(176,57,44,.14);
+  }
+  .name-bar input{
+    flex:1;
+    min-width:0;
+    padding:7px 0;
+    border:0;
+    outline:none;
+    background:transparent;
+    font-family:inherit;
+    font-size:16px;
+    letter-spacing:.1em;
+    text-align:center;
+    color:var(--ink);
+  }
+  .name-bar input::placeholder{ color:#93a9a0; letter-spacing:.06em; }
+
+  @media (max-height:640px){
+    .card{ padding-top:clamp(22px,5vw,34px); padding-bottom:clamp(26px,5vw,38px); }
+    .wish{ margin-bottom:1.4em; line-height:1.9; }
+    .eyebrow{ margin-bottom:.7em; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 背景：千里江山 ================= -->
+<svg class="bg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"
+     xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#f8f4ea"/>
+      <stop offset="42%" stop-color="#f1ecde"/>
+      <stop offset="76%" stop-color="#e7eae1"/>
+      <stop offset="100%" stop-color="#dae4dc"/>
+    </linearGradient>
+
+    <linearGradient id="farGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#b3cfc6"/>
+      <stop offset="100%" stop-color="#dcebe4"/>
+    </linearGradient>
+
+    <linearGradient id="midGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#79a89a"/>
+      <stop offset="100%" stop-color="#b5d0c3"/>
+    </linearGradient>
+
+    <linearGradient id="nearGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#3f7d6b"/>
+      <stop offset="55%"  stop-color="#2b5a4d"/>
+      <stop offset="100%" stop-color="#1e463c"/>
+    </linearGradient>
+
+    <linearGradient id="frontGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1c3f38"/>
+      <stop offset="100%" stop-color="#12302a"/>
+    </linearGradient>
+
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#c0473a" stop-opacity="0.28"/>
+      <stop offset="55%"  stop-color="#c0473a" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#c0473a" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="17"/>
+    </filter>
+
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+
+  <!-- 天 -->
+  <rect width="1440" height="900" fill="url(#skyGrad)"/>
+  <!-- 朱日 -->
+  <circle cx="1092" cy="218" r="172" fill="url(#sunGrad)"/>
+
+  <!-- 远山 -->
+  <path d="M0,470 Q110,358 230,428 Q330,488 430,392 Q530,296 640,402 Q720,482 820,392
+           Q920,302 1030,398 Q1130,484 1240,412 Q1340,346 1440,442 L1440,900 L0,900 Z"
+        fill="url(#farGrad)" opacity="0.9"/>
+
+  <!-- 云带 -->
+  <g filter="url(#soft)" opacity="0.8">
+    <ellipse cx="300"  cy="468" rx="236" ry="26" fill="#ffffff"/>
+    <ellipse cx="868"  cy="438" rx="286" ry="22" fill="#ffffff"/>
+    <ellipse cx="1284" cy="498" rx="206" ry="20" fill="#ffffff"/>
+  </g>
+
+  <!-- 中景山 -->
+  <path d="M0,600 Q120,486 240,556 Q360,626 470,516 Q580,406 690,536 Q790,652 900,542
+           Q1010,432 1120,552 Q1230,672 1340,582 Q1392,540 1440,570 L1440,900 L0,900 Z"
+        fill="url(#midGrad)" opacity="0.95"/>
+
+  <!-- 山脚雾 -->
+  <g filter="url(#soft)" opacity="0.62">
+    <ellipse cx="600"  cy="612" rx="330" ry="24" fill="#ffffff"/>
+    <ellipse cx="1210" cy="644" rx="262" ry="20" fill="#ffffff"/>
+  </g>
+
+  <!-- 近景山 -->
+  <path d="M0,742 Q140,640 270,700 Q400,760 500,660 Q600,560 720,682 Q830,792 940,690
+           Q1050,588 1170,700 Q1290,810 1440,718 L1440,900 L0,900 Z"
+        fill="url(#nearGrad)"/>
+
+  <!-- 飞瀑 -->
+  <g opacity="0.45" stroke="#ffffff" stroke-linecap="round">
+    <line x1="612" y1="670" x2="604" y2="744" stroke-width="2"/>
+    <line x1="1078" y1="702" x2="1072" y2="762" stroke-width="1.6"/>
+  </g>
+
+  <!-- 前景水岸 -->
+  <path d="M0,862 Q220,826 440,856 Q680,888 900,854 Q1140,820 1440,862 L1440,900 L0,900 Z"
+        fill="url(#frontGrad)"/>
+
+  <!-- 落款印 -->
+  <g opacity="0.45">
+    <rect x="1302" y="118" width="46" height="46" rx="4" fill="#b0392c"/>
+    <text x="1325" y="150" font-size="25" fill="#fff6f2" text-anchor="middle"
+          font-family="Kaiti SC, STKaiti, KaiTi, serif">山</text>
+  </g>
+
+  <!-- 纸纹 -->
+  <rect width="1440" height="900" filter="url(#grain)" opacity="0.055"
+        style="mix-blend-mode:multiply"/>
+</svg>
+
+<!-- 金屑 -->
+<div class="particles" id="particles" aria-hidden="true"></div>
+
+<!-- ================= 贺卡 ================= -->
+<main class="scene">
+  <div class="card-wrap">
+    <section class="card" id="card">
+
+      <svg class="card-mountain" viewBox="0 0 480 160" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,150 Q60,80 120,118 Q180,156 240,92 Q300,28 360,104 Q420,180 480,120 L480,160 L0,160 Z"
+              fill="currentColor"/>
+        <path d="M0,160 Q90,116 180,146 Q280,180 380,140 Q430,120 480,142 L480,160 L0,160 Z"
+              fill="currentColor" opacity="0.6"/>
+      </svg>
+
+      <div class="card-body">
+        <p class="eyebrow"></p>
+        <h1 class="title">生日快乐</h1>
+        <div class="rule"></div>
+        <p class="to">致 <span id="nameDisplay">魏</span></p>
+        <p class="wish">
+          愿你岁岁常欢愉，年年皆胜意<br>
+          山高水长，前程似锦
+        </p>
+        <button class="play-btn" id="playBtn" type="button">
+          <span class="icon">♪</span>
+          <span class="label">点击播放生日歌</span>
+        </button>
+      </div>
+
+      <div class="seal">happy</div>
+    </section>
+  </div>
+</main>
+
+<!-- ================= 底部输入 ================= -->
+<div class="name-bar">
+  <span class="brush" aria-hidden="true"></span>
+  <input id="nameInput" type="text" maxlength="12" autocomplete="off"
+         placeholder="输入祝贺对象的名字…" aria-label="祝贺对象">
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 名字联动 ---------------- */
+  var nameInput   = document.getElementById('nameInput');
+  var nameDisplay = document.getElementById('nameDisplay');
+
+  function syncName() {
+    var v = nameInput.value.trim();
+    nameDisplay.textContent = v || '亲爱的你';
+    try { localStorage.setItem('bday-name', v); } catch (e) {}
+  }
+  nameInput.addEventListener('input', syncName);
+
+  try {
+    var saved = localStorage.getItem('bday-name');
+    if (saved) { nameInput.value = saved; }
+  } catch (e) {}
+  syncName();
+
+  /* ---------------- 音频引擎 ---------------- */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ctx = null, master = null;
+
+  function ensureCtx() {
+    if (!AC) return false;
+    if (ctx) {
+      if (ctx.state === 'suspended') ctx.resume();
+      return true;
+    }
+    ctx = new AC();
+
+    master = ctx.createGain();
+    master.gain.value = 0.40;
+
+    // 简易回响，营造空谷余音
+    var delay = ctx.createDelay(1.0);
+    delay.delayTime.value = 0.27;
+    var fb  = ctx.createGain();  fb.gain.value  = 0.26;
+    var lp  = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200;
+    var wet = ctx.createGain();  wet.gain.value = 0.17;
+
+    master.connect(ctx.destination);
+    master.connect(delay);
+    delay.connect(lp);
+    lp.connect(fb);
+    fb.connect(delay);
+    lp.connect(wet);
+    wet.connect(ctx.destination);
+
+    return true;
+  }
+
+  // 拨弦质感：基音 + 泛音列，指数衰减
+  function playNote(freq, when, dur, vol) {
+    vol = (vol === undefined) ? 0.30 : vol;
+    var t0  = ctx.currentTime + when;
+    var out = ctx.createGain();
+
+    out.gain.setValueAtTime(0.0001, t0);
+    out.gain.exponentialRampToValueAtTime(vol, t0 + 0.014);
+    out.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 1.7 + 0.22);
+    out.connect(master);
+
+    var partials = [[1, 1], [2, 0.22], [3, 0.085], [4, 0.04]];
+    for (var i = 0; i < partials.length; i++) {
+      var mult = partials[i][0], amp = partials[i][1];
+      var o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = freq * mult * (1 + (Math.random() - 0.5) * 0.0016);
+      var g = ctx.createGain();
+      g.gain.value = amp;
+      o.connect(g);
+      g.connect(out);
+      o.start(t0);
+      o.stop(t0 + dur * 1.7 + 0.45);
+    }
+  }
+
+  /* ---------------- 生日歌 ---------------- */
+  var NOTES = {
+    G4: 392.00, A4: 440.00, B4: 493.88,
+    C5: 523.25, D5: 587.33, E5: 659.25,
+    F5: 698.46, G5: 783.99
+  };
+
+  // [音名, 时值(以四分音符为 1 拍)]
+  var MELODY = [
+    ['G4', 0.5], ['G4', 0.5], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 1.8],
+    ['G4', 0.5], ['G4', 0.5], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 1.8],
+    ['G4', 0.5], ['G4', 0.5], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 1.8],
+    ['F5', 0.5], ['F5', 0.5], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 1.8]
+  ];
+
+  var playBtn = document.getElementById('playBtn');
+  var card    = document.getElementById('card');
+  var label   = playBtn.querySelector('.label');
+
+  var playing  = false;
+  var endTimer = null;
+
+  function playSong() {
+    if (playing) return;
+    if (!ensureCtx()) {
+      label.textContent = '浏览器不支持音频';
+      return;
+    }
+
+    playing = true;
+    card.classList.add('playing');
+    playBtn.classList.add('playing');
+    label.textContent = '生日快乐 ♪';
+
+    var beat = 0.5;      // 一拍 0.5 秒
+    var t    = 0.22;     // 起手留白
+
+    for (var i = 0; i < MELODY.length; i++) {
+      var name = MELODY[i][0];
+      var d    = MELODY[i][1];
+      playNote(NOTES[name], t, d * beat);
+      t += d * beat;
+    }
+
+    var total = (t + 1.3) * 1000;
+    clearTimeout(endTimer);
+    endTimer = setTimeout(function () {
+      playing = false;
+      card.classList.remove('playing');
+      playBtn.classList.remove('playing');
+      label.textContent = '再听一次';
+    }, total);
+  }
+
+  playBtn.addEventListener('click', playSong);
+
+  /* ---------------- 飘浮金屑 ---------------- */
+  var layer = document.getElementById('particles');
+  var reduce = window.matchMedia &&
+               window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduce) {
+    var count = window.innerWidth < 640 ? 16 : 28;
+    var frag  = document.createDocumentFragment();
+
+    for (var i = 0; i < count; i++) {
+      var s    = document.createElement('span');
+      var size = 3 + Math.random() * 7;
+      s.style.left              = (Math.random() * 100) + '%';
+      s.style.width             = size + 'px';
+      s.style.height            = size + 'px';
+      s.style.animationDuration = (13 + Math.random() * 17).toFixed(1) + 's';
+      s.style.animationDelay    = (-Math.random() * 26).toFixed(1) + 's';
+      s.style.opacity           = (0.15 + Math.random() * 0.4).toFixed(2);
+      frag.appendChild(s);
+    }
+    layer.appendChild(frag);
+  }
+
+  /* ---------------- 阻止输入时误触键盘 ---------------- */
+  nameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); nameInput.blur(); playSong(); }
+  });
+})();
+</script>
+</body>
+</html>
